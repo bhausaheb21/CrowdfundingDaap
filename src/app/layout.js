@@ -1,6 +1,8 @@
 import localFont from "next/font/local";
-import "./globals.css";
-
+import './globals.css'
+import ClientLayout from "@/app/Components/ClientLayout";
+import RecoilWrapper from "./Components/RecoilWrapper";
+// import RecoilWrapper from "@/app/Components/RecoilWrapper";
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
   variable: "--font-geist-sans",
@@ -20,8 +22,9 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
+      
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        {children}
+        <RecoilWrapper>{children}</RecoilWrapper>
       </body>
     </html>
   );
