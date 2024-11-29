@@ -59,10 +59,11 @@ function Details() {
 
 
         const AllDonationsData = AllDonations.map((e) => {
+          // console.log(e.args);
           return {
             donor: e.args.donor,
             amount: ethers.utils.formatEther(e.args.amount),
-            timestamp: parseInt(e.args.timestamp)
+            timestamp: new Date(parseInt(e.args.timestamp.toString()) * 1000).toLocaleString()
           }
         });
         setAllDonations(AllDonationsData);
@@ -74,20 +75,20 @@ function Details() {
         const signer = provider1.getSigner();
         const userAddress = await signer.getAddress();
 
-
+        
         const myDonationsFilter = contract.filters.donated(userAddress);
         const donationEvents = await contract.queryFilter(myDonationsFilter);
-
+        
         const formattedDonations = donationEvents.map((event) => {
+          // console.log( );
           return {
+            
             donor: event.args.donor,
             amount: ethers.utils.formatEther(event.args.amount),
-            timestamp: new Date(event.args.timestamp.toNumber() * 1000).toLocaleString(),
+            timestamp: new Date(parseInt(event.args.timestamp.toString()) * 1000).toLocaleString(),
           }
         });
         setMydonations(formattedDonations)
-        // toast.success("Reco")
-        // toast.success("Record fetched successfully")
       }
       catch (err) {
         toast.error(err.message)
@@ -96,28 +97,50 @@ function Details() {
     }
 
     fetchData()
-  }, [address])
+  }, [change])
 
   const DonateFunds = async () => {
     try {
+      // Request account access if needed
       await window.ethereum.request({ method: 'eth_requestAccounts' });
+
+      // Initialize provider and signer
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       const signer = provider.getSigner();
 
+      // Create contract instance
       const contract = new ethers.Contract(address, Campaign.abi, signer);
+
+      // Validate the amount before sending it
+      if (parseFloat(amount) <= 0) {
+        toast.error("Amount must be greater than 0");
+        return;
+      }
+
+      // Send the transaction with Ether value
       const transaction = await contract.donate({
         value: ethers.utils.parseEther(amount),
-        gasLimit: 30000,
       });
-      await transaction.wait();
-      setChange(!change);
-      setAmount('');
-      toast.success("Transaction Succeded")
+
+      // Wait for transaction to be mined and get the receipt
+      const receipt = await transaction.wait();
+
+      // Check for errors in the receipt if the transaction failed
+      if (!receipt.status) {
+        toast.error("Transaction failed. Please check the smart contract logs.");
+        console.error("Transaction failed with receipt:", receipt);
+      } else {
+        setchange(!change);
+        setAmount('');
+        toast.success("Transaction Succeeded");
+      }
 
     } catch (error) {
-      toast.error("Transaction Failed")
+      console.error(error); // Log error for debugging
+      toast.error("Transaction Failed. Error: " + error.message);
     }
-  }
+  };
+
 
   return (
     (loading) ?
@@ -156,12 +179,12 @@ function Details() {
           </DonateSection>
           <FundsData>
             <Funds>
-              <FundText key={1}>Required Amount</FundText>
-              <FundText key={2}>{campaign.requiredAmount} Matic</FundText>
+              <FundText>Required Amount</FundText>
+              <FundText>{campaign.requiredAmount} Matic</FundText>
             </Funds>
             <Funds>
-              <FundText key={3}>Received Amount</FundText>
-              <FundText key={4}>{campaign.receivedAmount} Matic</FundText>
+              <FundText>Received Amount</FundText>
+              <FundText>{campaign.receivedAmount} Matic</FundText>
             </Funds>
           </FundsData>
 
@@ -171,9 +194,9 @@ function Details() {
               {
                 alldonations.map((e, index) => {
                   return <Donation key={index}>
-                    <DonationData key={index}>{e.donor.slice(0, 6)}...{e.donor.slice(39)}</DonationData>
-                    <DonationData key={index}>{e.amount} Matic</DonationData>
-                    <DonationData key={index}>{new Date(e.timeStamp * 1000).toLocaleString()}</DonationData>
+                    <DonationData>{e.donor.slice(0, 6)}...{e.donor.slice(39)}</DonationData>
+                    <DonationData>{e.amount} Matic</DonationData>
+                    <DonationData>{e.timestamp}</DonationData>
                   </Donation>
                 })
               }
@@ -182,9 +205,9 @@ function Details() {
               <DonationTitle>My Past Donations</DonationTitle>
               {mydonations.map((e, index) => {
                 return <Donation key={index}>
-                  <DonationData key={index}>{e.donor.slice(0, 6)}...{e.donor.slice(39)}</DonationData>
-                  <DonationData key={index}>{e.amount} Matic</DonationData>
-                  <DonationData key={index}>{new Date(e.timeStamp * 1000).toLocaleString()}</DonationData>
+                  <DonationData>{e.donor.slice(0, 6)}...{e.donor.slice(39)}</DonationData>
+                  <DonationData>{e.amount} Matic</DonationData>
+                  <DonationData>{e.timestamp}</DonationData>
                 </Donation>
               })
               }
