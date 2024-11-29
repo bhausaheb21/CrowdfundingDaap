@@ -9,10 +9,12 @@ import Campaign from '../../../../artifacts/contracts/Campaign.sol/Campaign.json
 import { useParams } from 'next/navigation';
 import axios from 'axios';
 import { toast, ToastContainer } from 'react-toastify';
+import { TailSpin } from 'react-loader-spinner';
 
 function Details() {
   const { address } = useParams()
   const [campaign, setCampaign] = useState({})
+  const [loading, setloading] = useState(false)
   const [mydonations, setMydonations] = useState([]);
   const [alldonations, setAllDonations] = useState([]);
   // const [story, setStoryUrl] = useState();
@@ -21,6 +23,7 @@ function Details() {
 
   useEffect(() => {
     const fetchData = async () => {
+      setloading(true)
       try {
 
         const provider = new ethers.providers.JsonRpcProvider(
@@ -86,9 +89,10 @@ function Details() {
         // toast.success("Reco")
         // toast.success("Record fetched successfully")
       }
-      catch(err){
+      catch (err) {
         toast.error(err.message)
       }
+      setloading(false)
     }
 
     fetchData()
@@ -116,78 +120,89 @@ function Details() {
   }
 
   return (
-    <DetailWrapper>
-      <ToastContainer
-        position="top-right"
-        autoClose={5000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-      />
-      <LeftContainer>
-        <ImageSection>
-          <Image
-            fill
-            alt="Can't load image"
-            src={`https://gateway.pinata.cloud/ipfs/${campaign.image}`} />
-        </ImageSection>
-        <Text>
-          {campaign.story}
-        </Text>
-      </LeftContainer>
-      <RightContainer>
-        <Title>{campaign.title}</Title>
-        <DonateSection>
-          <Input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="Enter Amount to Donate" />
-          <Donate onClick={DonateFunds}>Donate</Donate>
-        </DonateSection>
-        <FundsData>
-          <Funds>
-            <FundText>Required Amount</FundText>
-            <FundText>{campaign.requiredAmount} Matic</FundText>
-          </Funds>
-          <Funds>
-            <FundText>Received Amount</FundText>
-            <FundText>{campaign.receivedAmount} Matic</FundText>
-          </Funds>
-        </FundsData>
+    (loading) ?
+      <Spinner>
+        <TailSpin height={60} />
+      </Spinner>
+      :
+      <DetailWrapper>
+        <ToastContainer
+          position="top-right"
+          autoClose={5000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+        />
+        <LeftContainer>
+          <ImageSection>
+            <Image
+              fill
+              alt="Loading image"
+              src={`https://gateway.pinata.cloud/ipfs/${campaign.image}`} />
+          </ImageSection>
+          <Text>
+            {campaign.story}
+          </Text>
+        </LeftContainer>
+        <RightContainer>
+          <Title>{campaign.title}</Title>
+          <DonateSection>
+            <Input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="Enter Amount to Donate" />
+            <Donate onClick={DonateFunds}>Donate</Donate>
+          </DonateSection>
+          <FundsData>
+            <Funds>
+              <FundText>Required Amount</FundText>
+              <FundText>{campaign.requiredAmount} Matic</FundText>
+            </Funds>
+            <Funds>
+              <FundText>Received Amount</FundText>
+              <FundText>{campaign.receivedAmount} Matic</FundText>
+            </Funds>
+          </FundsData>
 
-        <Donated>
-          <LiveDonation>
-            <DonationTitle>Recent Donations</DonationTitle>
-            {
-              alldonations.map((e) => {
-                return <Donation>
+          <Donated>
+            <LiveDonation>
+              <DonationTitle>Recent Donations</DonationTitle>
+              {
+                alldonations.map((e, index) => {
+                  return <Donation key={index}>
+                    <DonationData>{e.donor.slice(0, 6)}...{e.donor.slice(39)}</DonationData>
+                    <DonationData>{e.amount} Matic</DonationData>
+                    <DonationData>{new Date(e.timeStamp * 1000).toLocaleString()}</DonationData>
+                  </Donation>
+                })
+              }
+            </LiveDonation>
+            <MyDonation>
+              <DonationTitle>My Past Donations</DonationTitle>
+              {mydonations.map((e, index) => {
+                return <Donation key={index}>
                   <DonationData>{e.donor.slice(0, 6)}...{e.donor.slice(39)}</DonationData>
                   <DonationData>{e.amount} Matic</DonationData>
                   <DonationData>{new Date(e.timeStamp * 1000).toLocaleString()}</DonationData>
                 </Donation>
               })
-            }
-          </LiveDonation>
-          <MyDonation>
-            <DonationTitle>My Past Donations</DonationTitle>
-            {mydonations.map((e) => {
-              return <Donation>
-                <DonationData>{e.donor.slice(0, 6)}...{e.donor.slice(39)}</DonationData>
-                <DonationData>{e.amount} Matic</DonationData>
-                <DonationData>{new Date(e.timeStamp * 1000).toLocaleString()}</DonationData>
-              </Donation>
-            })
-            }
-          </MyDonation>
-        </Donated>
+              }
+            </MyDonation>
+          </Donated>
 
-      </RightContainer>
-    </DetailWrapper>
+        </RightContainer>
+      </DetailWrapper>
   )
 }
 
-
+const Spinner = styled.div`
+    width:100%;
+    height:90vh;
+    display:flex ;
+    justify-content:center ;
+    align-items:center ;
+`
 const DetailWrapper = styled.div`
   display: flex;
   justify-content: space-between;

@@ -5,6 +5,7 @@ import styled from "styled-components";
 import Image from 'next/image';
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { TailSpin } from "react-loader-spinner";
 // import { ethers } from "hardhat";
 const CampaignFactory = require("../../artifacts/contracts/Campaign.sol/CampaignFactory.json");
 const Campaign = require("../../artifacts/contracts/Campaign.sol/Campaign.json");
@@ -21,6 +22,7 @@ export default function Layout({ children }) {
   const Router = useRouter()
 
   const [displayCampaigns, setdisplayCampaigns] = useState([])
+  const [loading, setloading] = useState(false)
 
   useEffect(() => {
     fetchData()
@@ -28,6 +30,7 @@ export default function Layout({ children }) {
 
   const fetchData = async () => {
 
+    setloading(true)
     const provider = new ethers.providers.JsonRpcProvider(
       process.env.NEXT_PUBLIC_RPC_URL
     );
@@ -102,48 +105,58 @@ export default function Layout({ children }) {
 
     });
     setanimalCampaigns(animaldata)
+    setloading(false)
   }
   return (
-    <HomeWrapper>
-      <FilterWrapper>
-        <FilterAlt style={{ fontSize: 40 }} />
-        <Category onClick={() => { setdisplayCampaigns(allCampaigns) }}>All</Category>
-        <Category onClick={() => { setdisplayCampaigns(healthCampaigns) }}>Health</Category>
-        <Category onClick={() => { setdisplayCampaigns(educationCampaigns) }}>Education</Category>
-        <Category onClick={() => { setdisplayCampaigns(animalCampaigns) }}>Animal</Category>
-      </FilterWrapper>
+    loading ? <Spinner>
+      <TailSpin height={60} />
+    </Spinner> :
+      <HomeWrapper>
+        <FilterWrapper>
+          <FilterAlt style={{ fontSize: 40 }} />
+          <Category onClick={() => { setdisplayCampaigns(allCampaigns) }}>All</Category>
+          <Category onClick={() => { setdisplayCampaigns(healthCampaigns) }}>Health</Category>
+          <Category onClick={() => { setdisplayCampaigns(educationCampaigns) }}>Education</Category>
+          <Category onClick={() => { setdisplayCampaigns(animalCampaigns) }}>Animal</Category>
+        </FilterWrapper>
 
-      <CardsWrapper>
-        {displayCampaigns.map((e, index) => {
-          return <Card key={index}>
-            <CardImg>
-              <Image
-                fill
-                alt="Failed to load Image"
-                src={`https://gateway.pinata.cloud/ipfs/${e.image}`} />
-            </CardImg>
-            <Title>{e.title}</Title>
-            <CardData>
-              <Text>Owner<AccountBox /></Text>
-              <Text>{e.owner.slice(0, 6)}...{e.owner.slice(39)}</Text>
-            </CardData>
-            <CardData>
-              <Text>Amount <Paid /></Text>
-              <Text>{e.amount} Matic</Text>
-            </CardData>
-            <CardData>
-              <Text><Event /></Text>
-              <Text>{new Date(e.timeStamp * 1000).toLocaleString()}</Text>
-            </CardData>
-            <Button onClick={() => { Router.push(`/details/${e.address}`) }}>Go to Campaign</Button>
-          </Card>
-        })}
-      </CardsWrapper>
-    </HomeWrapper>
+        <CardsWrapper>
+          {displayCampaigns.map((e, index) => {
+            return <Card key={index}>
+              <CardImg>
+                <Image
+                  fill
+                  alt="Failed to load Image"
+                  src={`https://gateway.pinata.cloud/ipfs/${e.image}`} />
+              </CardImg>
+              <Title>{e.title}</Title>
+              <CardData>
+                <Text>Owner<AccountBox /></Text>
+                <Text>{e.owner.slice(0, 6)}...{e.owner.slice(39)}</Text>
+              </CardData>
+              <CardData>
+                <Text>Amount <Paid /></Text>
+                <Text>{e.amount} Matic</Text>
+              </CardData>
+              <CardData>
+                <Text><Event /></Text>
+                <Text>{new Date(e.timeStamp * 1000).toLocaleString()}</Text>
+              </CardData>
+              <Button onClick={() => { Router.push(`/details/${e.address}`) }}>Go to Campaign</Button>
+            </Card>
+          })}
+        </CardsWrapper>
+      </HomeWrapper>
   );
 }
 
-
+const Spinner = styled.div`
+    width:100%;
+    height:90vh;
+    display:flex ;
+    justify-content:center ;
+    align-items:center ;
+`
 const HomeWrapper = styled.div`
   display: flex;
   flex-direction: column;

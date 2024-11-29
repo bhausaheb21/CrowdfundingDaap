@@ -9,12 +9,15 @@ import { ethers } from 'ethers';
 import CampaignFactory from '../../../artifacts/contracts/Campaign.sol/CampaignFactory.json';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { TailSpin } from 'react-loader-spinner';
 
 export default function Dashboard() {
   const [campaignsData, setCampaignsData] = useState([]);
+  const [loading, setloading] = useState(false)
 
   useEffect(() => {
     const Request = async () => {
+      setloading(true)
       await window.ethereum.request({ method: 'eth_requestAccounts' });
       const Web3provider = new ethers.providers.Web3Provider(window.ethereum);
       const signer = Web3provider.getSigner();
@@ -43,56 +46,67 @@ export default function Dashboard() {
         }
       })
       setCampaignsData(AllData)
+      setloading(false)
     }
     Request();
   }, [])
 
   return (
-    <HomeWrapper>
+    loading ?
+      <Spinner>
+        <TailSpin height={60} />
+      </Spinner>
+      : <HomeWrapper>
 
-      {/* Cards Container */}
-      <CardsWrapper>
+        {/* Cards Container */}
+        <CardsWrapper>
 
-        {/* Card */}
-        {campaignsData.map((e) => {
-          return (
-            <Card key={e.title}>
-              <CardImg>
-                <Image
-                  alt="crowdfunding dapp"
-                  layout='fill'
-                  src={"https://gateway.pinata.cloud/ipfs/" + e.image}
-                />
-              </CardImg>
-              <Title>
-                {e.title}
-              </Title>
-              <CardData>
-                <Text>Owner<AccountBoxIcon /></Text>
-                <Text>{e.owner.slice(0, 6)}...{e.owner.slice(39)}</Text>
-              </CardData>
-              <CardData>
-                <Text>Amount<PaidIcon /></Text>
-                <Text>{e.amount} Matic</Text>
-              </CardData>
-              <CardData>
-                <Text><EventIcon /></Text>
-                <Text>{new Date(e.timeStamp * 1000).toLocaleString()}</Text>
-              </CardData>
-              <Link passHref href={'/details/' + e.address}><Button>
-                Go to Campaign
-              </Button></Link>
-            </Card>
-          )
-        })}
-        {/* Card */}
+          {/* Card */}
+          {campaignsData.map((e, index) => {
+            return (
+              <Card key={index}>
+                <CardImg>
+                  <Image
+                    alt="Loading Image"
+                    layout='fill'
+                    src={"https://gateway.pinata.cloud/ipfs/" + e.image}
+                  />
+                </CardImg>
+                <Title>
+                  {e.title}
+                </Title>
+                <CardData>
+                  <Text>Owner<AccountBoxIcon /></Text>
+                  <Text>{e.owner.slice(0, 6)}...{e.owner.slice(39)}</Text>
+                </CardData>
+                <CardData>
+                  <Text>Amount<PaidIcon /></Text>
+                  <Text>{e.amount} Matic</Text>
+                </CardData>
+                <CardData>
+                  <Text><EventIcon /></Text>
+                  <Text>{new Date(e.timeStamp * 1000).toLocaleString()}</Text>
+                </CardData>
+                <Link passHref href={'/details/' + e.address}><Button>
+                  Go to Campaign
+                </Button></Link>
+              </Card>
+            )
+          })}
+          {/* Card */}
 
-      </CardsWrapper>
-    </HomeWrapper>
+        </CardsWrapper>
+      </HomeWrapper>
   )
 }
 
-
+const Spinner = styled.div`
+    width:100%;
+    height:90vh;
+    display:flex ;
+    justify-content:center ;
+    align-items:center ;
+`
 
 const HomeWrapper = styled.div`
   display: flex;
