@@ -96,7 +96,7 @@ function Details() {
     }
 
     fetchData()
-  }, [change])
+  }, [address])
 
   const DonateFunds = async () => {
     try {
@@ -156,12 +156,12 @@ function Details() {
           </DonateSection>
           <FundsData>
             <Funds>
-              <FundText>Required Amount</FundText>
-              <FundText>{campaign.requiredAmount} Matic</FundText>
+              <FundText key={1}>Required Amount</FundText>
+              <FundText key={2}>{campaign.requiredAmount} Matic</FundText>
             </Funds>
             <Funds>
-              <FundText>Received Amount</FundText>
-              <FundText>{campaign.receivedAmount} Matic</FundText>
+              <FundText key={3}>Received Amount</FundText>
+              <FundText key={4}>{campaign.receivedAmount} Matic</FundText>
             </Funds>
           </FundsData>
 
@@ -171,9 +171,9 @@ function Details() {
               {
                 alldonations.map((e, index) => {
                   return <Donation key={index}>
-                    <DonationData>{e.donor.slice(0, 6)}...{e.donor.slice(39)}</DonationData>
-                    <DonationData>{e.amount} Matic</DonationData>
-                    <DonationData>{new Date(e.timeStamp * 1000).toLocaleString()}</DonationData>
+                    <DonationData key={index}>{e.donor.slice(0, 6)}...{e.donor.slice(39)}</DonationData>
+                    <DonationData key={index}>{e.amount} Matic</DonationData>
+                    <DonationData key={index}>{new Date(e.timeStamp * 1000).toLocaleString()}</DonationData>
                   </Donation>
                 })
               }
@@ -182,9 +182,9 @@ function Details() {
               <DonationTitle>My Past Donations</DonationTitle>
               {mydonations.map((e, index) => {
                 return <Donation key={index}>
-                  <DonationData>{e.donor.slice(0, 6)}...{e.donor.slice(39)}</DonationData>
-                  <DonationData>{e.amount} Matic</DonationData>
-                  <DonationData>{new Date(e.timeStamp * 1000).toLocaleString()}</DonationData>
+                  <DonationData key={index}>{e.donor.slice(0, 6)}...{e.donor.slice(39)}</DonationData>
+                  <DonationData key={index}>{e.amount} Matic</DonationData>
+                  <DonationData key={index}>{new Date(e.timeStamp * 1000).toLocaleString()}</DonationData>
                 </Donation>
               })
               }
