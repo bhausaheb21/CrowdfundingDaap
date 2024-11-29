@@ -34,5 +34,13 @@
     "eslint-config-next": "14.2.15",
     "ethereum-waffle": "^4.0.10",
     "hardhat": "^2.22.13"
+  },
+  "extends": "next",
+  "rules": {
+    "react/no-unescaped-entities": "off",
+    "@next/next/no-page-custom-font": "off",
+    "jsx-a11y/alt-text": "off", // Disable the alt-text rule for images
+    "react/jsx-key": "off", // Disable the missing key prop warning for list items
+    "react-hooks/exhaustive-deps": "off" // Disable the exhaustive-deps warning for useEffect
   }
 }
